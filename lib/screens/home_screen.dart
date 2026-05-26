@@ -38,7 +38,6 @@ class HomePageState extends ConsumerState<HomeScreen> {
       greeting = "night";
       imgPath = "images/night.jpg";
     }
-    fToast.init(context);
   }
 
   @override
@@ -46,6 +45,7 @@ class HomePageState extends ConsumerState<HomeScreen> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     List<Task> tasks = ref.watch(tasksProvider).tasks;
     final listKey = GlobalKey<AnimatedListState>();
+    fToast.init(context);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -124,38 +124,38 @@ class HomePageState extends ConsumerState<HomeScreen> {
                       ref.read(tasksProvider).removeTask(task.id);
                       Future.delayed(Duration(milliseconds: 150), () {
                         ref.read(tasksProvider).delayedNotify();
-                        fToast.showToast(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-                            decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12.0),
-                            color: Colors.lightGreen,
-                            ),
-                            child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                                Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(
-                                width: 12.0,
-                                ),
-                                Text(
-                                  "Task completed! Gained ${task.exp} EXP.",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                  ),
-                                ),
-                            ],
-                            ),
-                          ),
-                          gravity: ToastGravity.BOTTOM,
-                          toastDuration: Duration(seconds: 2),
-                        );
                       });
+                      fToast.showToast(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                          decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          color: Colors.lightGreen,
+                          ),
+                          child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                              Icon(
+                                Icons.check,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                              width: 12.0,
+                              ),
+                              Text(
+                                "Task completed! Gained ${task.exp} EXP.",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                          ],
+                          ),
+                        ),
+                        gravity: ToastGravity.BOTTOM,
+                        toastDuration: Duration(seconds: 2),
+                      );
                     }
                   );
                 },

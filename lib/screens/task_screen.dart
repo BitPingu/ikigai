@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ikigai/models/task.dart';
 import 'package:ikigai/providers/task_provider.dart';
@@ -16,6 +17,8 @@ class TaskScreen extends ConsumerWidget {
     final text = taskId != null ? ref.watch(tasksProvider).getTask(taskId ?? "").title : "";
     final TextEditingController _inputController = TextEditingController(text: text);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    FToast fToast = FToast();
+    fToast.init(context);
 
     return Scaffold(
       body: Column(
@@ -62,6 +65,37 @@ class TaskScreen extends ConsumerWidget {
                               ref.read(tasksProvider).removeTask(taskId ?? "");
                               context.pop();
                               context.pop();
+                              fToast.showToast(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                                  decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  color: Colors.lightBlue,
+                                  ),
+                                  child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                      Icon(
+                                        Icons.delete,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(
+                                      width: 12.0,
+                                      ),
+                                      Text(
+                                        "Task deleted.",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16.0,
+                                        ),
+                                      ),
+                                  ],
+                                  ),
+                                ),
+                                gravity: ToastGravity.BOTTOM,
+                                toastDuration: Duration(seconds: 2),
+                              );
                             },
                             child: const Text(
                               'Yes',
