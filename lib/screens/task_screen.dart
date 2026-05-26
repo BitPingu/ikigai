@@ -62,7 +62,7 @@ class TaskScreen extends ConsumerWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              ref.read(tasksProvider).removeTask(taskId ?? "");
+                              ref.read(tasksProvider).deleteTask(taskId ?? "");
                               context.pop();
                               context.pop();
                               fToast.showToast(

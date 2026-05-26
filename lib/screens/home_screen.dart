@@ -85,7 +85,7 @@ class HomePageState extends ConsumerState<HomeScreen> {
               child: TweenAnimationBuilder(
                 tween: Tween<double>(
                   begin: tasks.length.toDouble(),
-                  end: tasks.length/3,
+                  end: tasks.length/ref.read(tasksProvider).total,
                 ), 
                 duration: const Duration(milliseconds: 150), 
                 builder: (context, value, _) =>
@@ -121,7 +121,7 @@ class HomePageState extends ConsumerState<HomeScreen> {
                         ),
                         duration: Duration(milliseconds: 150),
                       );
-                      ref.read(tasksProvider).removeTask(task.id);
+                      ref.read(tasksProvider).completeTask(task.id);
                       Future.delayed(Duration(milliseconds: 150), () {
                         ref.read(tasksProvider).delayedNotify();
                       });
@@ -156,6 +156,7 @@ class HomePageState extends ConsumerState<HomeScreen> {
                         gravity: ToastGravity.BOTTOM,
                         toastDuration: Duration(seconds: 2),
                       );
+                      print('${tasks.length.toDouble()}/${ref.read(tasksProvider).total}');
                     }
                   );
                 },

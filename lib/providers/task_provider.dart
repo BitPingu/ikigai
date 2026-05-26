@@ -43,15 +43,18 @@ class TaskNotifier extends ChangeNotifier {
 
   List<Task> get tasks => _tasks;
 
+  int total = 3;
+
   void addTask(Task task) {
     _tasks.add(task);
+    total++;
     notifyListeners();
   }
 
   void editTask(Task task) {
     int index = _tasks.indexWhere((item) => item.id == task.id);
     _tasks[index] = task;
-    notifyListeners();
+    // notifyListeners();
   }
 
   Task getTask(String taskId) {
@@ -59,15 +62,16 @@ class TaskNotifier extends ChangeNotifier {
     return task;
   }
 
-  void removeTask(String taskId) {
-    toggle(taskId);
+  void deleteTask(String taskId) {
     _tasks.removeWhere((task) => task.id == taskId);
+    total--;
     // notifyListeners();
   }
 
-  void toggle(String taskId) {
+  void completeTask(String taskId) {
     final task = _tasks.firstWhere((task) => task.id == taskId);
     task.isDone = !task.isDone;
+    _tasks.remove(task);
     // notifyListeners();
   }
 
