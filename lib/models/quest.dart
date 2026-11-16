@@ -1,11 +1,11 @@
-class Task {
+class Quest {
   final String id;
-  String title;
-  String subtitle;
-  int exp;
-  bool isDone;
+  final String title;
+  final String subtitle;
+  final int exp;
+  final bool isDone;
 
-  Task({
+  const Quest({
     required this.id,
     required this.title,
     required this.subtitle,
@@ -13,5 +13,3 @@ class Task {
     required this.isDone,
   });
 }
-
-

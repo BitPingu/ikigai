@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-
 
 class UserScreen extends ConsumerStatefulWidget {
   const UserScreen({super.key});
@@ -11,10 +10,7 @@ class UserScreen extends ConsumerStatefulWidget {
 }
 
 class UserPageState extends ConsumerState<UserScreen> {
-
   int selectedDataSetIndex = -1;
-  double angleValue = 0;
-  bool relativeAngleMode = true;
 
   @override
   Widget build(BuildContext context) {
@@ -23,77 +19,66 @@ class UserPageState extends ConsumerState<UserScreen> {
         child: Column(
           children: [
             const SizedBox(height: 80),
-            const Icon(
-              Icons.person,
-              size: 70,
-            ),
-            // const SizedBox(height: 2),
-            Text(
-              "Gavin",
-              style: Theme.of(context).textTheme.headlineSmall
-            ),
-            // const SizedBox(height: 2),
-            Text('Lvl. 2'),
+            const Icon(Icons.person, size: 70),
+            Text('Gavin', style: Theme.of(context).textTheme.headlineSmall),
+            const Text('Lvl. 2'),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 80),
               child: Column(
-                // crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   LinearProgressIndicator(value: .25),
-                  SizedBox(height: 4),
-                  Text("Next Level: 29 EXP"),
+                  const SizedBox(height: 4),
+                  const Text('Next Level: 29 EXP'),
                 ],
               ),
             ),
-            SizedBox(height: 24),
-            Container(
+            const SizedBox(height: 24),
+            SizedBox(
               height: 300,
               child: RadarChart(
-              RadarChartData(
-                dataSets: showingDataSets(),
-                radarBackgroundColor: Colors.transparent,
-                borderData: FlBorderData(show: false),
-                radarBorderData: const BorderSide(color: Colors.grey),
-                titlePositionPercentageOffset: 0.1,
-                titleTextStyle: TextStyle(
-                  color: Colors.orange, 
-                  fontWeight: FontWeight.bold,
+                RadarChartData(
+                  dataSets: showingDataSets(),
+                  radarBackgroundColor: Colors.transparent,
+                  borderData: FlBorderData(show: false),
+                  radarBorderData: const BorderSide(color: Colors.grey),
+                  titlePositionPercentageOffset: 0.1,
+                  titleTextStyle: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  getTitle: (index, angle) {
+                    switch (index) {
+                      case 0:
+                        return RadarChartTitle(
+                          text: 'Physical',
+                          angle: 0,
+                        );
+                      case 1:
+                        return RadarChartTitle(
+                          text: 'Mental',
+                          angle: 0,
+                        );
+                      case 2:
+                        return RadarChartTitle(
+                          text: 'Spiritual',
+                          angle: 0,
+                        );
+                      default:
+                        return const RadarChartTitle(text: '');
+                    }
+                  },
+                  tickCount: 1,
+                  ticksTextStyle: const TextStyle(
+                    color: Colors.transparent,
+                    fontSize: 10,
+                  ),
+                  tickBorderData: const BorderSide(color: Colors.transparent),
+                  gridBorderData: BorderSide(color: Colors.grey, width: 1),
                 ),
-                getTitle: (index, angle) {
-                  // final usedAngle = relativeAngleMode ? angle + angleValue : angleValue;
-                  double usedAngle = 0;
-                  switch (index) {
-                    case 0:
-                      return RadarChartTitle(
-                        text: 'Physical',
-                        angle: usedAngle,
-                      );
-                    case 1:
-                      return RadarChartTitle(
-                        text: 'Mental',
-                        angle: usedAngle,
-                      );
-                    case 2:
-                      return RadarChartTitle(
-                        text: 'Spiritual',
-                        angle: usedAngle,
-                      );
-                    default:
-                      return const RadarChartTitle(text: '');
-                  }
-                },
-                tickCount: 1,
-                ticksTextStyle: const TextStyle(
-                  color: Colors.transparent,
-                  fontSize: 10,
-                ),
-                tickBorderData: const BorderSide(color: Colors.transparent),
-                gridBorderData: BorderSide(color: Colors.grey, width: 1),
               ),
             ),
-            ),
-            Text("Your Well-Being"),
+            const Text('Your Well-Being'),
           ],
         ),
       ),
@@ -105,11 +90,8 @@ class UserPageState extends ConsumerState<UserScreen> {
       final index = entry.key;
       final rawDataSet = entry.value;
 
-      final isSelected = index == selectedDataSetIndex
-          ? true
-          : selectedDataSetIndex == -1
-              ? true
-              : false;
+      final isSelected =
+        selectedDataSetIndex == -1 || index == selectedDataSetIndex;
 
       return RadarDataSet(
         fillColor: isSelected
@@ -119,8 +101,9 @@ class UserPageState extends ConsumerState<UserScreen> {
             ? rawDataSet.color
             : rawDataSet.color.withValues(alpha: 0.25),
         entryRadius: isSelected ? 3 : 2,
-        dataEntries:
-            rawDataSet.values.map((e) => RadarEntry(value: e)).toList(),
+        dataEntries: rawDataSet.values
+            .map((e) => RadarEntry(value: e))
+            .toList(),
         borderWidth: isSelected ? 2.3 : 2,
       );
     }).toList();
@@ -131,26 +114,16 @@ class UserPageState extends ConsumerState<UserScreen> {
       RawDataSet(
         title: 'Stats',
         color: Colors.greenAccent,
-        values: [
-          60,
-          70,
-          50,
-        ],
+        values: [60, 70, 50],
       ),
     ];
   }
 }
 
 class RawDataSet {
-  RawDataSet({
-    required this.title,
-    required this.color,
-    required this.values,
-  });
+  RawDataSet({required this.title, required this.color, required this.values});
 
   final String title;
   final Color color;
   final List<double> values;
 }
-
-

@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
-
 
 class Navbar extends StatelessWidget {
   final Widget child;
@@ -14,28 +13,28 @@ class Navbar extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           switch (index) {
-              case 0:
-                context.go('/');
-                break;
-              case 1:
-                context.go('/user');
-                break;
-            }
+            case 0:
+              context.go('/');
+              break;
+            case 1:
+              context.go('/user');
+              break;
+          }
         },
         indicatorColor: Colors.amber,
         selectedIndex: _getSelectedIndex(context),
         destinations: const <Widget>[
           NavigationDestination(
             selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined), 
+            icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
           NavigationDestination(
             selectedIcon: Icon(Icons.person),
-            icon: Icon(Icons.person_outline), 
+            icon: Icon(Icons.person_outline),
             label: 'You',
           ),
-        ]
+        ],
       ),
     );
   }
@@ -47,4 +46,3 @@ class Navbar extends StatelessWidget {
     return 0;
   }
 }
-
