@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ikigai/models/quest.dart';
 
 class QuestNotifier extends ChangeNotifier {
+  // Stores the active quests.
   final List<Quest> _quests = [
     const Quest(
       id: '0',
@@ -27,19 +28,33 @@ class QuestNotifier extends ChangeNotifier {
     ),
   ];
 
+  // Provides read-only access to the current quests.
   List<Quest> get quests => List<Quest>.unmodifiable(_quests);
 
+  // Tracks daily quest progress.
+  int _completedQuestCount = 0;
+
+  // Initializes the daily quest total from the initial quest list.
+  late int _totalQuestCount = _quests.length;
+
+  int get completedQuestCount => _completedQuestCount;
+  int get totalQuestCount => _totalQuestCount;
+
+  // Generates unique IDs for newly created quests.
   int _nextQuestId = 3;
 
   String generateQuestId() {
     return (_nextQuestId++).toString();
   }
 
+  // Adds a new quest and increases the daily quest total.
   void addQuest(Quest quest) {
     _quests.add(quest);
+    _totalQuestCount++;
     notifyListeners();
   }
 
+  // Updates an existing quest using its ID.
   void editQuest(Quest quest) {
     final index = _quests.indexWhere((item) => item.id == quest.id);
 
@@ -49,6 +64,7 @@ class QuestNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Retrieves a quest by its ID.
   Quest? getQuest(String questId) {
     for (final quest in _quests) {
       if (quest.id == questId) return quest;
@@ -57,17 +73,24 @@ class QuestNotifier extends ChangeNotifier {
     return null;
   }
 
+  // Deletes a quest and adjusts the total if it was still active.
   void deleteQuest(String questId) {
-    final initialLength = _quests.length;
+    final index = _quests.indexWhere((quest) => quest.id == questId);
 
-    _quests.removeWhere((quest) => quest.id == questId);
+    if (index == -1) return;
 
-    if (_quests.length != initialLength) {
-      notifyListeners();
+    final quest = _quests.removeAt(index);
+
+    // Deleting an active quest reduces the daily quest total.
+    if (!quest.isDone) {
+      _totalQuestCount--;
     }
+
+    notifyListeners();
   }
 
-  void completeQuest(String questId) {
+  // Removes a completed quest after its completion animation.
+  void removeCompletedQuest(String questId) {
     final index = _quests.indexWhere((quest) => quest.id == questId);
 
     if (index == -1) return;
@@ -76,12 +99,15 @@ class QuestNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Marks a quest as completed and updates daily progress.
   void markQuestComplete(String questId) {
     final index = _quests.indexWhere((quest) => quest.id == questId);
+
     if (index == -1) return;
 
     final quest = _quests[index];
 
+    // Prevents the same quest from being counted more than once.
     if (quest.isDone) return;
 
     _quests[index] = Quest(
@@ -92,10 +118,14 @@ class QuestNotifier extends ChangeNotifier {
       isDone: true,
     );
 
+    // Increases the completed quest count.
+    _completedQuestCount++;
+
     notifyListeners();
   }
 }
 
+// Provides shared access to quest state throughout the app.
 final questProvider = ChangeNotifierProvider<QuestNotifier>(
   (ref) => QuestNotifier(),
 );

@@ -1,8 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:ikigai/models/quest.dart';
 import 'package:ikigai/providers/quest_provider.dart';
+import 'package:ikigai/widgets/app_button.dart';
 
 class QuestScreen extends ConsumerStatefulWidget {
   final String? questId;
@@ -63,290 +65,203 @@ class _QuestScreenState extends ConsumerState<QuestScreen> {
       );
     }
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      body: Column(
-        children: [
-          const SizedBox(height: 80.0),
-
-          // Screen header.
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(width: 60.0),
-              Text(
-                widget.questId == null ? 'New quest!' : 'Edit quest',
-                style: TextStyle(
-                  color: !isDarkMode ? Colors.black87 : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                ),
-              ),
-              widget.questId != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: IconButton(
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (dialogContext) {
-                            return AlertDialog(
-                              content: const Text(
-                                'Are you sure you want to delete this quest?',
-                                style: TextStyle(fontSize: 16.0),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    dialogContext.pop();
-                                  },
-                                  child: const Text('No'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    // Capture the messenger before navigating away.
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
+              // Screen header.
+              Row(
+                children: [
+                  // Returns to the previous screen.
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
 
-                                    // Delete the quest.
-                                    ref
-                                        .read(questProvider)
-                                        .deleteQuest(widget.questId!);
-
-                                    // Close the dialog and edit screen.
-                                    dialogContext.pop();
-                                    context.pop();
-
-                                    // Show a deletion confirmation.
-                                    messenger
-                                      ..hideCurrentSnackBar()
-                                      ..showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.delete,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              const Text(
-                                                'Quest deleted.',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.lightBlue,
-                                          duration: const Duration(seconds: 2),
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                        snackBarAnimationStyle:
-                                            const AnimationStyle(
-                                              duration: Duration(
-                                                milliseconds: 300,
-                                              ),
-                                              reverseDuration: Duration(
-                                                milliseconds: 300,
-                                              ),
-                                            ),
-                                      );
-                                  },
-                                  child: const Text('Yes'),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        icon: Icon(
-                          Icons.delete,
-                          size: 24.0,
-                          color: Colors.red[700],
-                        ),
-                      ),
-                    )
-                  : const SizedBox(width: 60.0),
-            ],
-          ),
-
-          // Quest input container.
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: 26.0,
-              vertical: 16.0,
-            ),
-            padding: const EdgeInsets.only(bottom: 6.0),
-            decoration: BoxDecoration(
-              color: !isDarkMode ? Colors.white : Colors.grey[800],
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Column(
-              children: [
-                // Close button.
-                Row(
-                  children: [
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => context.pop(),
-                      icon: const Icon(Icons.close, size: 20.0),
-                    ),
-                    const SizedBox(width: 3.0),
-                  ],
-                ),
-
-                // Quest title input.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: TextField(
-                    autofocus: true,
-                    textCapitalization: TextCapitalization.sentences,
-                    controller: _inputController,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: !isDarkMode ? Colors.black87 : Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(borderSide: BorderSide.none),
-                      hintText: 'What do you want to do?',
-                      hintStyle: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w400,
-                      ),
+                  // Displays the screen title.
+                  Expanded(
+                    child: Text(
+                      widget.questId == null ? 'New quest' : 'Edit quest',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 6.0),
+                  // Displays the delete action when editing.
+                  if (widget.questId != null)
+                    IconButton(
+                      onPressed: _confirmDelete,
+                      icon: const Icon(Icons.delete_outline),
+                      color: Theme.of(context).colorScheme.error,
+                    )
+                  else
+                    const SizedBox(width: 48),
+                ],
+              ),
 
-                // Save button.
-                Row(
-                  children: [
-                    const Spacer(),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _inputController,
-                      builder: (context, value, child) {
-                        final hasTitle = value.text.trim().isNotEmpty;
+              const SizedBox(height: 32),
 
-                        return TextButton(
-                          style: hasTitle
-                              ? ButtonStyle(
-                                  backgroundColor: WidgetStatePropertyAll(
-                                    Colors.tealAccent[400],
-                                  ),
-                                  foregroundColor: const WidgetStatePropertyAll(
-                                    Colors.white,
-                                  ),
-                                )
-                              : null,
-                          onPressed: hasTitle
-                              ? () {
-                                  final title = _inputController.text.trim();
+              // Displays the quest title input.
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quest title',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
 
-                                  if (widget.questId == null) {
-                                    // Create a new quest.
-                                    final provider = ref.read(questProvider);
+                  const SizedBox(height: 8),
 
-                                    provider.addQuest(
-                                      Quest(
-                                        id: provider.generateQuestId(),
-                                        title: title,
-                                        subtitle: '10 EXP',
-                                        exp: 10,
-                                        isDone: false,
-                                      ),
-                                    );
-
-                                    context.pop();
-                                  } else {
-                                    // Capture the messenger before navigating away.
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
-
-                                    // Update the existing quest.
-                                    ref
-                                        .read(questProvider)
-                                        .editQuest(
-                                          Quest(
-                                            id: widget.questId!,
-                                            title: title,
-                                            subtitle: currentQuest!.subtitle,
-                                            exp: currentQuest.exp,
-                                            isDone: currentQuest.isDone,
-                                          ),
-                                        );
-
-                                    context.pop();
-
-                                    // Show an update confirmation.
-                                    messenger
-                                      ..hideCurrentSnackBar()
-                                      ..showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.edit,
-                                                color: Colors.white,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              const Text(
-                                                'Quest updated.',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.lightBlue,
-                                          duration: const Duration(seconds: 2),
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                        snackBarAnimationStyle:
-                                            const AnimationStyle(
-                                              duration: Duration(
-                                                milliseconds: 300,
-                                              ),
-                                              reverseDuration: Duration(
-                                                milliseconds: 300,
-                                              ),
-                                            ),
-                                      );
-                                  }
-                                }
-                              : null,
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        );
-                      },
+                  TextField(
+                    controller: _inputController,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _saveQuest(),
+                    decoration: const InputDecoration(
+                      hintText: 'What do you want to accomplish?',
+                      border: OutlineInputBorder(),
                     ),
-                    const SizedBox(width: 6.0),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Text(
+                    'Give your quest a short, actionable name.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+
+              const Spacer(),
+
+              // Saves the new quest or updates the existing quest.
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _inputController,
+                builder: (context, value, child) {
+                  final hasTitle = value.text.trim().isNotEmpty;
+
+                  return SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      label: widget.questId == null
+                          ? 'Create quest'
+                          : 'Save changes',
+                      onPressed: hasTitle ? _saveQuest : null,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  // Confirms and handles quest deletion.
+  void _confirmDelete() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete quest?'),
+          content: const Text('Are you sure you want to delete this quest?'),
+          actions: [
+            TextButton(
+              onPressed: () => dialogContext.pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Capture the messenger before navigating away.
+                final messenger = ScaffoldMessenger.of(context);
+
+                // Delete the quest.
+                ref.read(questProvider).deleteQuest(widget.questId!);
+
+                // Close the dialog and edit screen.
+                dialogContext.pop();
+                context.pop();
+
+                // Show a deletion confirmation.
+                messenger
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text('Quest deleted.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Creates a new quest or saves changes to an existing quest.
+  void _saveQuest() {
+    final title = _inputController.text.trim();
+
+    // Prevents saving an empty quest title.
+    if (title.isEmpty) return;
+
+    if (widget.questId == null) {
+      // Create a new quest.
+      final provider = ref.read(questProvider);
+
+      provider.addQuest(
+        Quest(
+          id: provider.generateQuestId(),
+          title: title,
+          subtitle: '10 EXP',
+          exp: 10,
+          isDone: false,
+        ),
+      );
+    } else {
+      // Update the existing quest.
+      final currentQuest = ref.read(questProvider).getQuest(widget.questId!);
+
+      if (currentQuest == null) return;
+
+      ref
+          .read(questProvider)
+          .editQuest(
+            Quest(
+              id: currentQuest.id,
+              title: title,
+              subtitle: currentQuest.subtitle,
+              exp: currentQuest.exp,
+              isDone: currentQuest.isDone,
+            ),
+          );
+    }
+
+    // Capture the messenger before navigating away.
+    final messenger = ScaffoldMessenger.of(context);
+
+    // Close the screen after saving.
+    context.pop();
+
+    // Show a confirmation when editing an existing quest.
+    if (widget.questId != null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Quest updated.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+    }
   }
 }

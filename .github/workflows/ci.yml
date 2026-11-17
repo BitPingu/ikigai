@@ -1,0 +1,40 @@
+# Runs automated checks whenever code is pushed or a pull request is opened.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  analyze-and-test:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out the repository so the workflow can access the source code.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Installs the same Flutter SDK version used during local development.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.0'
+          cache: true
+
+      # Downloads the project's dependencies.
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Checks whether Dart files follow the standard formatting rules.
+      # Fails if formatting changes are needed without modifying any files.
+      - name: Check formatting
+        run: dart format --set-exit-if-changed .
+
+      # Runs the Dart and Flutter static analyzer.
+      - name: Analyze
+        run: flutter analyze
+
+      # Executes the project's automated tests.
+      - name: Run tests
+        run: flutter test

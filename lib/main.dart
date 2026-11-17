@@ -1,9 +1,14 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'router/router.dart';
+
+import 'package:ikigai/router/router.dart';
+import 'package:ikigai/theme/app_theme.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    // Provides shared Riverpod state throughout the application.
+    const ProviderScope(child: MyApp()),
+  );
 }
 
 class MyApp extends ConsumerWidget {
@@ -12,12 +17,12 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      // Configures app navigation.
+      // Uses the application's GoRouter configuration.
       routerConfig: ref.watch(routerProvider),
 
-      // Configures the light and dark themes.
-      theme: ThemeData(colorSchemeSeed: Colors.tealAccent),
-      darkTheme: ThemeData.dark(),
+      // Applies the application's custom themes.
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
 
       // Hides the debug banner.

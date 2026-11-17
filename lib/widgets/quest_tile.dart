@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:ikigai/models/quest.dart';
 import 'package:ikigai/providers/quest_provider.dart';
 
@@ -18,8 +19,8 @@ class QuestTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch this quest for changes, including its completion status.
-    // Fall back to the original quest when it has been removed from the provider.
+    // Watches this quest for changes, including its completion status.
+    // Falls back to the original quest if it has been removed from the provider.
     final currentQuest = ref.watch(
       questProvider.select((notifier) {
         for (final item in notifier.quests) {
@@ -30,6 +31,7 @@ class QuestTile extends ConsumerWidget {
       }),
     );
 
+    // Animates the row's height when it is inserted or removed from the list.
     return SizeTransition(
       sizeFactor: animation,
       child: buildItem(context, currentQuest),
@@ -37,85 +39,97 @@ class QuestTile extends ConsumerWidget {
   }
 
   Widget buildItem(BuildContext context, Quest currentQuest) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    final backgroundColor = !isDarkMode
-        ? Colors.cyan[50]!
-        : Colors.blueGrey[700]!;
-
+    // Provides a Material surface for the row's ink effects.
     return Material(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(12.0),
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16.0,
-          vertical: 2.0,
-        ),
-        title: Text(
-          currentQuest.title,
-          style: TextStyle(
-            color: !isDarkMode ? Colors.black87 : Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          '${currentQuest.exp} EXP',
-          style: TextStyle(color: !isDarkMode ? Colors.black87 : Colors.white),
-        ),
-        onTap: currentQuest.isDone
-            ? null
-            : () {
-                context.push('/new-quest/${currentQuest.id}');
-              },
-        trailing: Stack(
-          children: [
-            // Background layer of the check button.
-            Positioned(
-              top: 4,
-              left: 3,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.all(4),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: !currentQuest.isDone
-                      ? Colors.tealAccent[400]
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
+      color: Colors.transparent,
+      child: Row(
+        children: [
+          // Makes the quest details tappable to open the edit screen.
+          Expanded(
+            child: InkWell(
+              onTap: currentQuest.isDone
+                  ? null
+                  : () {
+                      context.push('/new-quest/${currentQuest.id}');
+                    },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 10,
+                ),
+                child: AnimatedOpacity(
+                  // Fades the quest details when completed.
+                  opacity: currentQuest.isDone ? 0.55 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Displays the quest title.
+                      Text(
+                        currentQuest.title,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: currentQuest.isDone
+                              ? colorScheme.onSurfaceVariant
+                              : colorScheme.onSurface,
+                          decoration: currentQuest.isDone
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+
+                      // Displays the EXP reward.
+                      Text(
+                        '${currentQuest.exp} EXP',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+          ),
 
-            // Foreground layer containing the check icon.
-            Positioned(
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: !currentQuest.isDone
-                      ? Colors.white
-                      : Colors.tealAccent[400],
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: IconButton(
-                  onPressed: onClicked,
-                  icon: AnimatedSwitcher(
+          // Displays the circular quest completion button.
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: currentQuest.isDone ? null : onClicked,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: currentQuest.isDone
+                        ? null
+                        : Border.all(color: colorScheme.primary, width: 1.5),
+                    color: currentQuest.isDone
+                        ? colorScheme.primary
+                        : Colors.transparent,
+                  ),
+                  child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
                       Icons.check,
                       key: ValueKey(currentQuest.isDone),
-                      color: !currentQuest.isDone
-                          ? Colors.tealAccent[400]
-                          : Colors.white,
-                      size: 27.0,
+                      color: currentQuest.isDone
+                          ? colorScheme.onPrimary
+                          : colorScheme.primary,
+                      size: 14,
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
